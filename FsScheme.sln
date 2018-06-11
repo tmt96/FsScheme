@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E2E7E9A4-D12
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FsScheme", "src\FsScheme\FsScheme.fsproj", "{86A3DFAE-8ECD-4FAD-B847-24435494E51E}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Library", "src\Library\Library.fsproj", "{5DCC8B12-4065-4EEB-BC55-820B78017B45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,8 +34,21 @@ Global
 		{86A3DFAE-8ECD-4FAD-B847-24435494E51E}.Release|x64.Build.0 = Release|Any CPU
 		{86A3DFAE-8ECD-4FAD-B847-24435494E51E}.Release|x86.ActiveCfg = Release|Any CPU
 		{86A3DFAE-8ECD-4FAD-B847-24435494E51E}.Release|x86.Build.0 = Release|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Debug|x64.Build.0 = Debug|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Debug|x86.Build.0 = Debug|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Release|x64.ActiveCfg = Release|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Release|x64.Build.0 = Release|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Release|x86.ActiveCfg = Release|Any CPU
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{86A3DFAE-8ECD-4FAD-B847-24435494E51E} = {E2E7E9A4-D129-44C8-8742-F77B776859CB}
+		{5DCC8B12-4065-4EEB-BC55-820B78017B45} = {E2E7E9A4-D129-44C8-8742-F77B776859CB}
 	EndGlobalSection
 EndGlobal
