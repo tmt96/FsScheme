@@ -5,11 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="*.fs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="FParsec" Version="1.0.3" />
+    <Compile Include="LispVal.fs" />
+    <Compile Include="Parser.fs" />
+    <Compile Include="Runner.fs" />
   </ItemGroup>
-
 </Project>

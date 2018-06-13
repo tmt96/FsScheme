@@ -2,7 +2,7 @@ namespace Library
 
 module LispVal = 
 
-    type Env = (string * LispVal ref) list ref
+    type Env =  Map<string, LispVal ref> 
 
     and FuncRecord = {
         parameters: string list;
