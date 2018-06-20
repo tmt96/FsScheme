@@ -1,13 +1,14 @@
 namespace Library
 
-open System
-open System
 module Parser =
+    open System
 
     open FParsec.Primitives 
     open FParsec.CharParsers
     open FParsec
+
     open LispVal
+    open Errors
 
     type LispParser<'a> = Parser<'a, unit>
     type LispParser = Parser<LispVal, unit>
@@ -65,4 +66,4 @@ module Parser =
         match runParserOnString parseExpr () "scheme" input with
         | Success (result, _, _) -> 
             result
-        | Failure (errString, _, _) -> String ("No match: " + errString)
+        | Failure (message, error, _) -> raise (LispException(Parser(message, error)))
