@@ -1,9 +1,11 @@
 namespace Library
 
+open System
+open System
 module Parser =
 
     open FParsec.Primitives 
-    open FParsec.CharParsers 
+    open FParsec.CharParsers
     open FParsec
     open LispVal
 
@@ -12,16 +14,16 @@ module Parser =
 
     let symbol: LispParser<char> = anyOf "!$%&|*+-/:<=>?@^_~#"
 
-    let spaces1: LispParser<unit> = skipMany1 spaces
-
     let chr c = skipChar c
+
+    let endBy p sep = many (p .>> sep)
 
     let parseString: LispParser = chr '"' >>. manyChars (noneOf "\"\\") |>> String .>> chr '"'
 
     let parseAtom: LispParser = parse {
         let! first = letter <|> symbol
-        let! rest = many (letter <|> digit <|> symbol)
-        return match string (first::rest) with
+        let! rest = manyChars (letter <|> digit <|> symbol)
+        return match string first + rest with
                 | "#t" -> Bool(true)
                 | "#f" -> Bool(false)
                 | atom -> Atom(atom)
@@ -34,16 +36,20 @@ module Parser =
     let parseExpr, parseExprRef : LispParser * LispParser ref = createParserForwardedToRef()
 
     let parseNormList: LispParser =
-        sepBy parseExpr spaces |>> List
+        sepBy parseExpr spaces1 |>> List
 
     let parseDottedList: LispParser = parse {
-        let! head = sepEndBy parseExpr spaces
-        let! tail = chr '.' >>. spaces >>. parseExpr
+        let! head = endBy parseExpr spaces1
+        let! tail = chr '.' >>. spaces1 >>. parseExpr
         return DottedList(head, tail)
     }
 
-    let parseList: LispParser =
-        chr '(' >>. (attempt parseNormList <|> parseDottedList) .>> chr '('
+    let parseList: LispParser = parse { 
+       do! chr '(' 
+       let! x = (attempt parseNormList) <|> parseDottedList 
+       do! chr ')' 
+       return x 
+    }
 
     let parseQuoted: LispParser = 
         chr '\'' >>. parseExpr |>> fun expr -> List [Atom "quote"; expr]
@@ -57,5 +63,6 @@ module Parser =
 
     let ReadExpr input =
         match runParserOnString parseExpr () "scheme" input with
-        | Success (result, _, _) -> "Found value " + string result
-        | Failure (errString, _, _) -> "No match: " + errString
+        | Success (result, _, _) -> 
+            result
+        | Failure (errString, _, _) -> String ("No match: " + errString)
