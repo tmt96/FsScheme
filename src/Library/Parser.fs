@@ -1,11 +1,9 @@
 namespace Library
 
 module Parser =
-    open System
 
     open FParsec.Primitives 
     open FParsec.CharParsers
-    open FParsec
 
     open LispVal
     open Errors

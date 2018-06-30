@@ -1,22 +1,16 @@
 ﻿// Learn more about F# at http://fsharp.org
 
 open System
-open Library.Parser
-open Library.Eval
-open Library.Errors
-open Library.LispVal
+
+open Library.Repl
 
 let rec fib n: int64 =
     if n <= 1 then int64 1 else fib (n-1) + fib (n-2)
 
-let evalString expr =
-    try
-        expr |> ReadExpr |> Eval
-    with
-    | LispException(error) -> String (ShowError error)
-    
 [<EntryPoint>]
 let main argv =
-    let repl = evalString >> ShowVal
-    Console.WriteLine(repl argv.[0])
+    match argv.Length with
+    | 0 -> runRepl
+    | 1 -> evalAndPrint argv.[0]
+    | otherwise -> Console.WriteLine("Program expects 0 or 1 arguments, received " + (string otherwise))
     0
