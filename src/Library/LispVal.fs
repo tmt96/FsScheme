@@ -23,21 +23,23 @@ module LispVal =
         | Func of FuncRecord
         | Nil
 
-    let rec ShowVal = function
-        | Atom atom -> atom
-        | String str -> "\"" + str + "\""
-        | Number num -> string num
-        | Bool true -> "#t"
-        | Bool false -> "#f"
-        | Nil -> "Nil"
-        | List contents -> "(" + UnwordsList contents + ")"
-        | DottedList (head, tail) -> "(" + UnwordsList head + "." + ShowVal tail + ")"
-        | PrimitiveFunc (_) -> "<primitive>"
-        | Func (func) -> "(lambda (" +
-                         UnwordsList (func.parameters |> List.map String) +
-                         (match func.varargs with
-                            | None -> ""
-                            | Some(arg) -> "." + arg) +
-                         ") ...)"
+    let unwordsList = List.map string >> String.concat " "
 
-    and UnwordsList = List.map ShowVal >> String.concat " "
+    type LispVal with
+        override this.ToString() =
+            match this with
+            | Atom atom -> atom
+            | String str -> "\"" + str + "\""
+            | Number num -> string num
+            | Bool true -> "#t"
+            | Bool false -> "#f"
+            | Nil -> "Nil"
+            | List contents -> "(" + unwordsList contents + ")"
+            | DottedList (head, tail) -> "(" + unwordsList head + "." + string tail + ")"
+            | PrimitiveFunc (_) -> "<primitive>"
+            | Func (func) -> "(lambda (" +
+                             unwordsList (func.parameters |> List.map String) +
+                             (match func.varargs with
+                                | None -> ""
+                                | Some(arg) -> "." + arg) +
+                             ") ...)"
