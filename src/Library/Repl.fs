@@ -24,10 +24,10 @@ module Repl =
         try
             expr |> readExpr |> eval env
         with
-        | LispException(error) -> String (ShowError error)
+        | LispException(error) -> String (string error)
 
     let evalAndPrint env =
-        evalString env >> ShowVal >> printStr >> printNewLine
+        evalString env >> string >> printStr >> printNewLine
     
     let rec until pred (prompt: unit -> string) evaluator =
         let result = prompt ()

@@ -14,15 +14,16 @@ module Errors =
         | IOError of string
         | Default of string
 
-    let ShowError = function
-        | UnboundVar (message, varName) -> message + ": " + varName
-        | BadSpecialForm (message, form) -> message + ": " + ShowVal form
-        | NotFunction (message, func) -> message + ": " + func
-        | NumArgs (expected, found) -> "Expected: " + string expected + " args; found values " + UnwordsList found
-        | TypeMismatch (expected, found) -> "Invalid type: expected " + expected + ", found " + ShowVal found
-        | Parser (message, parseErr) -> "Parse error at " + message
-        | IOError message -> "IO Error: " + message
-        | Default message -> "Error: " + message
+        override this.ToString() =
+            match this with
+            | UnboundVar (message, varName) -> message + ": " + varName
+            | BadSpecialForm (message, form) -> message + ": " + string form
+            | NotFunction (message, func) -> message + ": " + func
+            | NumArgs (expected, found) -> "Expected: " + string expected + " args; found values " + unwordsList found
+            | TypeMismatch (expected, found) -> "Invalid type: expected " + expected + ", found " + string found
+            | Parser (message, _) -> "Parse error at " + message
+            | IOError message -> "IO Error: " + message
+            | Default message -> "Error: " + message
     
     exception LispException of LispError
 

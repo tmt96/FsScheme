@@ -1,12 +1,10 @@
 namespace Library
 
 open LispVal
-open FParsec
+open Errors
 open System.Collections.Generic
+
 module SymbolTable = 
-    open System.Collections.Generic
-    open LispVal
-    open Errors
 
     let nullEnv (): Env = new Dictionary<_, _>()
 
