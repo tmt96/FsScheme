@@ -60,7 +60,7 @@ module Parser =
         <|> parseQuoted
         <|> parseList
 
-    let ReadExpr input =
+    let readExpr input =
         match runParserOnString parseExpr () "scheme" input with
         | Success (result, _, _) -> 
             result

@@ -11,6 +11,6 @@ let rec fib n: int64 =
 let main argv =
     match argv.Length with
     | 0 -> runRepl
-    | 1 -> evalAndPrint argv.[0]
+    | 1 -> runOne argv.[0]
     | otherwise -> Console.WriteLine("Program expects 0 or 1 arguments, received " + (string otherwise))
     0

@@ -6,6 +6,7 @@ module Repl =
     open LispVal
     open Parser
     open Errors
+    open SymbolTable
     open Eval
 
     let defaultPrompt = "scheme>> "
@@ -19,14 +20,14 @@ module Repl =
         printStr defaultPrompt
         Console.ReadLine()
 
-    let evalString expr =
+    let evalString env expr =
         try
-            expr |> ReadExpr |> Eval
+            expr |> readExpr |> eval env
         with
         | LispException(error) -> String (ShowError error)
 
-    let evalAndPrint =
-        evalString >> ShowVal >> printStr >> printNewLine
+    let evalAndPrint env =
+        evalString env >> ShowVal >> printStr >> printNewLine
     
     let rec until pred (prompt: unit -> string) evaluator =
         let result = prompt ()
@@ -35,8 +36,12 @@ module Repl =
             until pred prompt evaluator
 
     let runRepl =
+        let env = nullEnv ()
         let terminator = fun (s: string) -> s.ToLower() = "quit"
-        until terminator readPrompt evalAndPrint 
+        until terminator readPrompt (evalAndPrint env) 
+
+    let runOne expr =
+        evalAndPrint (nullEnv()) expr 
 
     let runFile filename args = ()
     

@@ -3,6 +3,7 @@ namespace Library
 module Eval =
     open LispVal
     open Errors
+    open SymbolTable
 
     let rec unpackNum = function
         | Number n -> n
@@ -113,18 +114,22 @@ module Eval =
             "equal?", equal
         ]
 
-    let rec Eval = function
+    let rec eval env = function
         | String _ as v -> v
         | Number _ as v -> v
         | Bool _ as v -> v
-        // | Atom _ as v -> v
+        | Atom v -> getVar env v
         | List[Atom "quote"; v] -> v
         | List[Atom "if"; pred; conseq; alt] -> 
-            match Eval pred with
-            | Bool false -> Eval alt
-            | _ -> Eval conseq
+            match eval env pred with
+            | Bool false -> eval env alt
+            | _ -> eval env conseq
+        | List[Atom "define"; Atom var; form] ->
+            eval env form |> defineVar env var 
+        | List[Atom "set!"; Atom var; form] ->
+            eval env form |> setVar env var 
         | List (Atom func :: args) ->
-            args |> List.map Eval |> apply func
+            args |> List.map (eval env)|> apply func
         | badForm -> throw (BadSpecialForm ("Unrecognized special form", badForm))
 
     and apply func args =

@@ -1,8 +1,9 @@
 namespace Library
 
 module LispVal = 
+    open System.Collections.Generic
 
-    type Env =  Map<string, LispVal ref> 
+    type Env =  Dictionary<string, LispVal> 
 
     and FuncRecord = {
         parameters: string list;
