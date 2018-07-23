@@ -35,13 +35,15 @@ module Repl =
             evaluator result
             until pred prompt evaluator
 
+    let primitiveBindings () = bindVars (nullEnv ()) [for v, f in primitives -> v, PrimitiveFunc f]
+
     let runRepl =
-        let env = nullEnv ()
+        let env = primitiveBindings ()
         let terminator = fun (s: string) -> s.ToLower() = "quit"
         until terminator readPrompt (evalAndPrint env) 
 
     let runOne expr =
-        evalAndPrint (nullEnv()) expr 
+        evalAndPrint (primitiveBindings ()) expr 
 
     let runFile filename args = ()
     
