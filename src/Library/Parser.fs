@@ -60,8 +60,11 @@ module Parser =
         <|> parseQuoted
         <|> parseList
 
-    let readExpr input =
-        match runParserOnString parseExpr () "scheme" input with
+    let readOrThrow parser input =
+        match runParserOnString parser () "scheme" input with
         | Success (result, _, _) -> 
             result
-        | Failure (message, error, _) -> raise (LispException(Parser(message, error)))
+        | Failure (message, error, _) -> raise (LispException(Errors.Parser(message, error)))
+    
+    let readExpr = readOrThrow parseExpr
+    let readExprList = readOrThrow (endBy parseExpr spaces)

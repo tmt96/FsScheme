@@ -1,6 +1,5 @@
 namespace Library
 
-open System.Linq
 module SymbolTable = 
     open System.Collections.Generic
 
@@ -115,8 +114,6 @@ module SymbolTable =
             "eqv?", eqv
             "equal?", equal
         ]
-
-
 
     let nullEnv (): Env = new Dictionary<_, _>()
 

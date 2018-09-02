@@ -2,6 +2,7 @@ namespace Library
 
 module LispVal = 
     open System.Collections.Generic
+    open System.IO
 
     type Env =  Dictionary<string, LispVal> 
 
@@ -21,6 +22,8 @@ module LispVal =
         | Bool of bool
         | PrimitiveFunc of (LispVal list -> LispVal)
         | Func of FuncRecord
+        | IOFunc of (LispVal list -> LispVal)
+        | Port of Stream
         | Nil
 
     let unwordsList = List.map string >> String.concat " "
@@ -43,3 +46,5 @@ module LispVal =
                                 | None -> ""
                                 | Some(arg) -> "." + arg) +
                              ") ...)"
+            | IOFunc _ -> "<IO prim>"
+            | Port _ -> "<IO port>"                     
