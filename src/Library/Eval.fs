@@ -20,6 +20,44 @@ module Eval =
     
     let makeVarArgs = string >> Some >> makeFunc
 
+
+    let fileIOFunction func = function
+        | [String fileName] -> func(fileName)
+        | [] -> throw(IOError("No filename provided"))
+        | args -> throw(NumArgs(1, args))
+
+    let load =
+        fileIOFunction(
+            fun fileName -> File.ReadAllText(fileName) |> readExprList)
+
+    let makePort fileAccessMode =
+        fileIOFunction(fun fileName -> 
+            File.Open(fileName, FileMode.OpenOrCreate, fileAccessMode) :> Stream |> Port
+        )
+
+    let closePort = function
+        | [Port port] -> port.Close(); Bool true
+        | _ -> Bool false
+
+    let rec readProc = function
+        | [Port port] -> 
+            use reader = new StreamReader(port)
+            reader.ReadLine() |> readExpr
+        | [] -> readProc [Port (Console.OpenStandardInput())]
+        | args -> throw(NumArgs(1, args))
+
+    let rec writeProc = function
+        | [obj; Port port] ->
+            use writer = new StreamWriter(port)
+            writer.WriteLine(string obj)
+            Bool true
+        | [obj] -> 
+            writeProc [obj; Port (Console.OpenStandardOutput())]
+        | args -> throw (NumArgs(1, args)) 
+
+    let readContents = 
+        fileIOFunction(fun fileName -> String (File.ReadAllText(fileName)))
+
     let rec eval env = function
         | String _ as v -> v
         | Number _ as v -> v
@@ -43,7 +81,9 @@ module Eval =
         | List (Atom "lambda" :: ((Atom _) as varargs) :: body) ->
             makeVarArgs varargs env [] body
         | List [Atom "set!"; Atom var; form] ->
-            eval env form |> setVar env var 
+            eval env form |> setVar env var
+        | List [Atom "load"; filename] ->
+            load [filename] |> List.map(eval env) |> List.last
         | List (func :: args) ->
             let f = eval env func
             let argVals = args |> List.map (eval env)
@@ -74,41 +114,5 @@ module Eval =
         | [func; List args] -> apply func args
         | func::args -> apply func args
         | [] -> throw (Default("Expecting a function, got an empty list"))
-
-    let fileIOFunction func = function
-        | [String fileName] -> func(fileName)
-        | [] -> throw(IOError("No filename provided"))
-        | args -> throw(NumArgs(1, args))
-
-    let makePort fileAccessMode =
-        fileIOFunction(fun fileName -> 
-            File.Open(fileName, FileMode.OpenOrCreate, fileAccessMode) :> Stream |> Port
-        )
-
-    let closePort = function
-        | [Port port] -> port.Close(); Bool true
-        | _ -> Bool false
-
-    let rec readProc = function
-        | [Port port] -> 
-            use reader = new StreamReader(port)
-            reader.ReadLine() |> readExpr
-        | [] -> readProc [Port (Console.OpenStandardInput())]
-        | args -> throw(NumArgs(1, args))
-
-    let rec writeProc = function
-        | [obj; Port port] ->
-            use writer = new StreamWriter(port)
-            writer.WriteLine(string obj)
-            Bool true
-        | [obj] -> 
-            writeProc [obj; Port (Console.OpenStandardOutput())]
-        | args -> throw (NumArgs(1, args)) 
-
-    let readContents = 
-        fileIOFunction(fun fileName -> String (File.ReadAllText(fileName)))
-
-    let load =
-        fileIOFunction(fun fileName -> File.ReadAllText(fileName) |> readExprList)
 
     let readAll fileName = load fileName |> List

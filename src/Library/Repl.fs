@@ -42,8 +42,12 @@ module Repl =
         let terminator = fun (s: string) -> s.ToLower() = "quit"
         until terminator readPrompt (evalAndPrint env) 
 
-    let runOne expr =
-        evalAndPrint (primitiveBindings ()) expr 
+    let runOne args =
+        let env = bindVars (primitiveBindings ()) [("args", List(List.tail args |> List.map String ))]
+        try
+            (List [Atom "load"; String(args.[0])]) |> eval env |> string |> printStrLine
+        with
+        | LispException(error) -> string error |> printStrLine
 
     let runFile filename args = ()
     
