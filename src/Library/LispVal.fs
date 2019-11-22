@@ -1,19 +1,18 @@
 namespace Library
 
-module LispVal = 
+module LispVal =
     open System.Collections.Generic
     open System.IO
 
-    type Env =  Dictionary<string, LispVal> 
+    type Env = Dictionary<string, LispVal>
 
-    and FuncRecord = {
-        parameters: string list;
-        varargs: string option;
-        body: LispVal list;
-        closure: Env;
-    }
+    and FuncRecord =
+        { parameters: string list
+          varargs: string option
+          body: LispVal list
+          closure: Env }
 
-    and LispVal = 
+    and LispVal =
         | Atom of string
         | List of LispVal list
         | DottedList of LispVal list * LispVal
@@ -38,13 +37,19 @@ module LispVal =
             | Bool false -> "#f"
             | Nil -> "Nil"
             | List contents -> "(" + unwordsList contents + ")"
-            | DottedList (head, tail) -> "(" + unwordsList head + "." + string tail + ")"
-            | PrimitiveFunc (_) -> "<primitive>"
-            | Func (func) -> "(lambda (" +
-                             unwordsList (func.parameters |> List.map String) +
-                             (match func.varargs with
-                                | None -> ""
-                                | Some(arg) -> "." + arg) +
-                             ") ...)"
+            | DottedList(head, tail) -> "(" + unwordsList head + "." + string tail + ")"
+            | PrimitiveFunc(_) -> "<primitive>"
+            | Func(func) ->
+                let funcString =
+                    func.parameters
+                    |> List.map String
+                    |> unwordsList
+
+                let funcArgsString =
+                    match func.varargs with
+                    | None -> ""
+                    | Some(arg) -> "." + arg
+
+                sprintf "(lambda (%s %s) ...)" funcString funcArgsString
             | IOFunc _ -> "<IO prim>"
-            | Port _ -> "<IO port>"                     
+            | Port _ -> "<IO port>"

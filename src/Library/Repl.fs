@@ -15,7 +15,6 @@ module Repl =
     let printStrLine (s: string) = Console.WriteLine(s)
     let printNewLine () = Console.WriteLine()
 
-
     let readPrompt () =
         printStr defaultPrompt
         Console.ReadLine()
@@ -35,7 +34,7 @@ module Repl =
             evaluator result
             until pred prompt evaluator
 
-    let primitiveBindings () = bindVars (nullEnv ()) [for v, f in primitives -> v, PrimitiveFunc f]
+    let primitiveBindings () = bindVars (nullEnv ()) ([for v, f in primitives -> v, PrimitiveFunc f] @ [for v, f in ioPrimitives -> v, IOFunc f])
 
     let runRepl =
         let env = primitiveBindings ()
@@ -48,6 +47,4 @@ module Repl =
             (List [Atom "load"; String(args.[0])]) |> eval env |> string |> printStrLine
         with
         | LispException(error) -> string error |> printStrLine
-
-    let runFile filename args = ()
     

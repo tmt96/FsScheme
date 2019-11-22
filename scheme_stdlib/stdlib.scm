@@ -1,7 +1,7 @@
 (define (not x)
     (if x #f #t))
 (define (null? obj)
-    (eqv? obj '()))
+    (if (eqv? obj '()) #t #f))
 (define (list . objs)
     objs)
 (define (id obj)
@@ -26,11 +26,11 @@
     (= (mod num 2) 0))
 
 (define (foldr func end lst)
-    (if (null?? lst)
+    (if (null? lst)
         end
         (func (car lst) (foldr func end (cdr lst)))))
 (define (foldl func accum lst)
-    (if (null?? lst)
+    (if (null? lst)
         accum
         (foldl func (func accum (car lst)) (cdr lst))))
 (define fold foldl)
