@@ -108,9 +108,9 @@ module Eval =
         match func with
         | PrimitiveFunc func -> func args
         | Func { parameters = parms; varargs = varargs; body = body; closure = closure } ->
-            string func |> printfn "%s"
-            printfn "parms: %A, args: %A, body: %A" parms args body
-            if parms.Length <> args.Length && varargs.IsNone then
+            let invalidNonVarargs = args.Length <> parms.Length && varargs.IsNone
+            let invalidVarargs = args.Length < parms.Length && varargs.IsSome
+            if invalidVarargs || invalidNonVarargs then
                 throw (NumArgs(parms.Length, args))
             else
                 let remainingArgs = args |> List.skip parms.Length
@@ -122,9 +122,10 @@ module Eval =
 
                 let bindVarArgs arg env =
                     match arg with
-                    | Some(argName) -> bindVars env [ argName, (List remainingArgs) ]
+                    | Some(argName) -> bindVars [ argName, (List remainingArgs) ] env
                     | None -> env
-                bindVars closure (Seq.zip parms args |> Seq.toList)
+
+                bindVars (Seq.zip parms args |> Seq.toList) closure
                 |> bindVarArgs varargs
                 |> evalBody
         | IOFunc func -> func args

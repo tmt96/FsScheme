@@ -9,8 +9,7 @@ let rec fib n: int64 =
 
 [<EntryPoint>]
 let main argv =
-    match argv.Length with
-    | 0 -> runRepl
-    | 1 -> argv |> Array.toList |> runOne 
-    | otherwise -> Console.WriteLine("Program expects 0 or 1 arguments, received " + (string otherwise))
+    match Array.toList argv with
+    | [] -> runRepl
+    | filename :: args -> runOne filename args
     0

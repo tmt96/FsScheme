@@ -34,15 +34,25 @@ module Repl =
             evaluator result
             until pred prompt evaluator
 
-    let primitiveBindings () = bindVars (nullEnv ()) ([for v, f in primitives -> v, PrimitiveFunc f] @ [for v, f in ioPrimitives -> v, IOFunc f])
+
+    let loadStdLib env =
+        eval env
+            (List
+                [ Atom "load"
+                  sprintf "%s/../../scheme_stdlib/stdlib.scm" __SOURCE_DIRECTORY__ |> String ])
+        |> ignore
+        env
 
     let runRepl =
-        let env = primitiveBindings ()
+        let env = primitiveBindings() |> loadStdLib
         let terminator = fun (s: string) -> s.ToLower() = "quit"
         until terminator readPrompt (evalAndPrint env) 
 
-    let runOne args =
-        let env = bindVars (primitiveBindings ()) [("args", List(List.tail args |> List.map String ))]
+    let runOne filename args =
+        let env =
+            primitiveBindings()
+            |> loadStdLib
+            |> bindVars [ ("args", List(List.map String args)) ]
         try
             (List [Atom "load"; String(args.[0])]) |> eval env |> string |> printStrLine
         with

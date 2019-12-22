@@ -37,7 +37,7 @@ module LispVal =
             | Bool false -> "#f"
             | Nil -> "Nil"
             | List contents -> "(" + unwordsList contents + ")"
-            | DottedList(head, tail) -> "(" + unwordsList head + "." + string tail + ")"
+            | DottedList(head, tail) -> "(" + unwordsList head + " . " + string tail + ")"
             | PrimitiveFunc(_) -> "<primitive>"
             | Func(func) ->
                 let funcString =
@@ -48,8 +48,8 @@ module LispVal =
                 let funcArgsString =
                     match func.varargs with
                     | None -> ""
-                    | Some(arg) -> "." + arg
+                    | Some(arg) -> " . " + arg.Trim()
 
-                sprintf "(lambda (%s %s) ...)" funcString funcArgsString
+                sprintf "(lambda (%s%s) ...)" funcString funcArgsString
             | IOFunc _ -> "<IO prim>"
             | Port _ -> "<IO port>"
