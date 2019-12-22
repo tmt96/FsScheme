@@ -126,7 +126,7 @@ module SymbolTable =
     let getVar (env: Env) var  =
         let result = !env |> List.tryFind (keyEq var)
         match result with
-        | None -> throw (UnboundVar("Getting an unbounded variable: " , var))
+        | None -> throw (UnboundVar("Getting an unbounded variable" , var))
         | Some(_, r) -> !r
 
     let setVar (env:Env) var value  =
@@ -135,7 +135,7 @@ module SymbolTable =
         | Some(_, v) -> 
             v := value
             value
-        | None -> throw (UnboundVar("Setting an unbounded variable: " , var))
+        | None -> throw (UnboundVar("Setting an unbounded variable" , var))
 
     let defineVar (env:Env) var value =
         let result = !env |> List.tryFind (keyEq var)
