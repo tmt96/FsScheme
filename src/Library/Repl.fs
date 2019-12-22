@@ -10,30 +10,38 @@ module Repl =
     open Eval
 
     let defaultPrompt = "scheme>> "
-    
+
     let printStr (s: string) = Console.Write(s)
     let printStrLine (s: string) = Console.WriteLine(s)
-    let printNewLine () = Console.WriteLine()
+    let printNewLine() = Console.WriteLine()
 
-    let readPrompt () =
+    let readPrompt() =
         printStr defaultPrompt
         Console.ReadLine()
 
     let evalString env expr =
         try
-            expr |> readExpr |> eval env
-        with
-        | LispException(error) -> String (string error)
+            expr
+            |> readExpr
+            |> eval env
+        with LispException(error) -> String(string error)
 
     let evalAndPrint env =
-        evalString env >> string >> printStr >> printNewLine
-    
+        evalString env
+        >> string
+        >> printStr
+        >> printNewLine
+
     let rec until pred (prompt: unit -> string) evaluator =
-        let result = prompt ()
+        let result = prompt()
         if not (pred result) then
             evaluator result
             until pred prompt evaluator
 
+    let primitiveBindings() =
+        bindVars
+            ([ for v, f in primitives -> v, PrimitiveFunc f ]
+             @ [ for v, f in ioPrimitives -> v, IOFunc f ]) (nullEnv())
 
     let loadStdLib env =
         eval env
@@ -46,7 +54,7 @@ module Repl =
     let runRepl =
         let env = primitiveBindings() |> loadStdLib
         let terminator = fun (s: string) -> s.ToLower() = "quit"
-        until terminator readPrompt (evalAndPrint env) 
+        until terminator readPrompt (evalAndPrint env)
 
     let runOne filename args =
         let env =
@@ -54,7 +62,11 @@ module Repl =
             |> loadStdLib
             |> bindVars [ ("args", List(List.map String args)) ]
         try
-            (List [Atom "load"; String(args.[0])]) |> eval env |> string |> printStrLine
-        with
-        | LispException(error) -> string error |> printStrLine
-    
+            (List
+                [ Atom "load"
+                  String filename ])
+            |> eval env
+            |> string
+            |> printStrLine
+        with LispException(error) -> string error |> printStrLine
+ 

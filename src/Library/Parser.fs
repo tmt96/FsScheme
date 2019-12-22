@@ -2,13 +2,14 @@ namespace Library
 
 module Parser =
 
-    open FParsec.Primitives 
+    open FParsec.Primitives
     open FParsec.CharParsers
 
     open LispVal
     open Errors
 
     type LispParser<'a> = Parser<'a, unit>
+
     type LispParser = Parser<LispVal, unit>
 
     let symbol: LispParser<char> = anyOf "!$%&|*+-/:<=>?@^_~#"
@@ -17,54 +18,58 @@ module Parser =
 
     let endBy p sep = many (p .>> sep)
 
-    let parseString: LispParser = chr '"' >>. manyChars (noneOf "\"\\") |>> String .>> chr '"'
+    // let parseString: LispParser = chr '"' >>. manyChars (noneOf "\"\\") |>> String .>> chr '"'
+    let parseString: LispParser =
+        parse {
+            do! chr '"'
+            let! xs = manyChars (noneOf "\"")
+            do! chr '"'
+            return String(xs)
+        }
 
-    let parseAtom: LispParser = parse {
-        let! first = letter <|> symbol
-        let! rest = manyChars (letter <|> digit <|> symbol)
-        return match string first + rest with
-                | "#t" -> Bool(true)
-                | "#f" -> Bool(false)
-                | atom -> Atom(atom)
-    }
+    let parseAtom: LispParser =
+        parse {
+            let! first = letter <|> symbol
+            let! rest = manyChars (letter <|> digit <|> symbol)
+            return match string first + rest with
+                   | "#t" -> Bool(true)
+                   | "#f" -> Bool(false)
+                   | atom -> Atom(atom)
+        }
 
-    let parseNumber: LispParser = 
-        many1Chars digit |>> (System.Int32.Parse >> Number)
+    let parseNumber: LispParser = many1Chars digit |>> (System.Int32.Parse >> Number)
 
 
-    let parseExpr, parseExprRef : LispParser * LispParser ref = createParserForwardedToRef()
+    let parseExpr, parseExprRef: LispParser * LispParser ref = createParserForwardedToRef()
 
-    let parseNormList: LispParser =
-        sepBy parseExpr spaces1 |>> List
+    let parseNormList: LispParser = sepBy parseExpr spaces1 |>> List
 
-    let parseDottedList: LispParser = parse {
-        let! head = endBy parseExpr spaces1
-        let! tail = chr '.' >>. spaces1 >>. parseExpr
-        return DottedList(head, tail)
-    }
+    let parseDottedList: LispParser =
+        parse {
+            let! head = endBy parseExpr spaces1
+            let! tail = chr '.' >>. spaces1 >>. parseExpr
+            return DottedList(head, tail) }
 
-    let parseList: LispParser = parse { 
-       do! chr '(' 
-       let! x = (attempt parseNormList) <|> parseDottedList 
-       do! chr ')' 
-       return x 
-    }
+    let parseList: LispParser =
+        parse {
+            do! chr '('
+            let! x = (attempt parseNormList) <|> parseDottedList
+            do! chr ')'
+            return x
+        }
 
-    let parseQuoted: LispParser = 
-        chr '\'' >>. parseExpr |>> fun expr -> List [Atom "quote"; expr]
+    let parseQuoted: LispParser =
+        chr '\'' >>. parseExpr |>> fun expr ->
+            List
+                [ Atom "quote"
+                  expr ]
 
-    do parseExprRef :=
-        parseAtom
-        <|> parseString
-        <|> parseNumber
-        <|> parseQuoted
-        <|> parseList
+    do parseExprRef := parseAtom <|> parseString <|> parseNumber <|> parseQuoted <|> parseList
 
     let readOrThrow parser input =
         match runParserOnString parser () "scheme" input with
-        | Success (result, _, _) -> 
-            result
-        | Failure (message, error, _) -> raise (LispException(Errors.Parser(message, error)))
-    
+        | Success(result, _, _) -> result
+        | Failure(message, error, _) -> raise (LispException(Errors.Parser(message, error)))
+
     let readExpr = readOrThrow parseExpr
     let readExprList = readOrThrow (endBy parseExpr spaces)

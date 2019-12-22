@@ -87,7 +87,8 @@ module Eval =
             | Bool false -> eval env alt
             | _ -> eval env conseq
         | List [ Atom "define"; Atom var; form ] -> eval env form |> defineVar env var
-        | List(Atom "define" :: List(Atom var :: parms) :: body) -> makeNormalFunc env parms body |> defineVar env var
+        | List(Atom "define" :: List(Atom var :: parms) :: body) ->
+            makeNormalFunc env parms body |> defineVar env var
         | List(Atom "define" :: DottedList((Atom var :: parms), varargs) :: body) ->
             makeVarArgs varargs env parms body |> defineVar env var
         | List(Atom "lambda" :: (List parms :: body)) -> makeNormalFunc env parms body

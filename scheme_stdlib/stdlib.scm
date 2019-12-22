@@ -20,7 +20,7 @@
     (curry < 0))
 (define negative?
     (curry > 0))
-(define (odd?? num)
+(define (odd? num)
     (= (mod num 2) 1))
 (define (even? num)
     (= (mod num 2) 0))
