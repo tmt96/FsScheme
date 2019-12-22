@@ -4,7 +4,7 @@ module LispVal =
     open System.Collections.Generic
     open System.IO
 
-    type Env = Dictionary<string, LispVal>
+    type Env = (string * LispVal ref) list ref
 
     and FuncRecord =
         { parameters: string list

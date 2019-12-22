@@ -17,14 +17,16 @@ module SymbolTable =
         | List [n] -> unpackNum n
         | notNum -> throw (TypeMismatch ("number", notNum))
     
-    let unpackBool = function
+    let rec unpackBool = function
         | Bool b -> b
+        | List [b]  -> unpackBool b
         | notBool -> throw (TypeMismatch ("bool", notBool))
 
-    let unpackString = function
+    let rec unpackString = function
         | String s -> s
         | Number s -> string s
         | Bool s -> string s
+        | List [s]  -> unpackString s
         | notString -> throw (TypeMismatch ("string", notString))
 
     let tryUnpacker unpack op arg1 arg2 = 
@@ -115,28 +117,35 @@ module SymbolTable =
             "equal?", equal
         ]
 
-    let nullEnv (): Env = new Dictionary<_, _>()
+    let nullEnv (): Env = ref List.empty
 
-    let isBound (env: Env) var = env.ContainsKey var
+    let keyEq name (k, _) = name = k
 
-    let getVar (env: Env) var =
-        try
-            env.[var]
-        with
-            | :? KeyNotFoundException -> throw (UnboundVar("Getting an unbounded varialbe", var))
+    let isBound (env: Env) var  = !env |> List.exists (keyEq var)
 
-    let setVar (env: Env) var value =
-        if isBound env var  then
-            env.[var] <- value
+    let getVar (env: Env) var  =
+        let result = !env |> List.tryFind (keyEq var)
+        match result with
+        | None -> throw (UnboundVar("Getting an unbounded variable: " , var))
+        | Some(_, r) -> !r
+
+    let setVar (env:Env) var value  =
+        let result = !env |> List.tryFind (keyEq var)
+        match result with
+        | Some(_, v) -> 
+            v := value
             value
-        else
-            throw (UnboundVar("Getting an unbounded varialbe", var))
+        | None -> throw (UnboundVar("Setting an unbounded variable: " , var))
 
-    let defineVar  (env: Env) var value =
-        env.[var] <- value
-        value
+    let defineVar (env:Env) var value =
+        let result = !env |> List.tryFind (keyEq var)
+        match result with
+        | Some(_, v) -> 
+            v := value
+            value
+        | None ->
+            env := [var, ref value] @ !env
+            value
 
-    let bindVars (env: Env) bindings  =
-        for key, value in bindings do 
-            env.[key] <- value
-        env
+    let bindVars bindings (env: Env)  =
+        ref ((bindings |> List.map (fun (n, v) -> n , ref v)) @ !env)
